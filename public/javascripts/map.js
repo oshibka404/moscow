@@ -1,112 +1,125 @@
 var M = {
-	center: [55.7333, 37.6007],
-	fullMapTopLeft = [55.9146, 36.7218], // Широта и долгота левого-верхнего угла картинки с картой
+	center: [37.618637, 55.751920],
 
 	init: function () {
-		this.url = '/get_data';
-		this.width = window.innerWidth;
-		this.height = window.innerHeight;
+		this.width = window.innerWidth - 20;
+		this.height = window.innerHeight - 20;
 		document.body.className = 'loading';
-		this.getData()
-			.then(this._parseJSON.bind(this))
-			.then(this._calculateScale.bind(this))
-			.then(this._initDataLayer.bind(this))
+		
+		this.svg = d3.select('body').append('svg')
+			.attr('width', this.width)
+			.attr('height', this.height);
+
+		this.getMap()
+			.then(this._setProjection.bind(this))
+			.then(this._drawMap.bind(this))
+			.then(this.getData.bind(this))
+			.then(this._parseData.bind(this))
+			.then(this._drawDataLayer.bind(this))
 			.catch(function(err) {
 				throw err;
 			});
 	},
 
-	_calculateScale: function (data) { 
-		var mapRatio = (this.fullMapTopLeft[0]-this.center[0]) / (this.fullMapTopLeft[1]-this.center[1]);
-		var screenRatio = this.width / this.height;
-		if (mapRatio > screenRatio) { // верх и низ карты скрыты
-			var topBorderLat = this.fullMapTopLeft[1] - (this.fullMapTopLeft[1] - this.center[1]) * (mapRatio / screenRatio);
-			this.leftTop = [this.fullMapTopLeft[0], topBorderLat];
-		}
-
-		return _normalizeCoords(data);
-	},
-
-	_initDataLayer: function(data) {
-		this._drawHistogram(data);
-		this._drawData(data);
-	},
-
-	getData: function() {
-		var request = new XMLHttpRequest();
+	getMap: function() {
+		
 		var deferred = Q.defer();
 
-		request.open("GET", this.url, true);
-		request.onload = onload;
-		request.onerror = onerror;
-		request.onprogress = onprogress;
-		request.send();
-
-		function onload() {
-			if (request.status === 200) {
-				deferred.resolve(request.responseText);
-			} else {
-				deferred.reject(new Error("Status code was " + request.status));
+		d3.json('/data/moscow.json', function(error, map) {
+			if (error) {
+				deferred.reject(error);
 			}
-		}
-
-		function onerror() {
-			deferred.reject(new Error("Can't XHR " + JSON.stringify(url)));
-		}
-
-		function onprogress(event) {
-			deferred.notify(event.loaded / event.total * 100 + '%');
-		}
+			deferred.resolve(map);
+		});
 
 		return deferred.promise;
 	},
 
-	_parseJSON: function(json) {
-		var rawData = [];
-		try {
-			rawData = JSON.parse(json);
-		} catch (e) {
-			throw e;
+	_setProjection: function(map) {
+		this.projection = d3.geo.mercator()
+			.center(this.center)
+			.scale(16000)
+			.translate([this.width / 2, this.height / 2]);
+		return map;
+	},
+
+	_drawMap: function(mapData) {
+		var map = this.svg.append('svg:g')
+    		.attr('id', 'map');
+
+		var path = d3.geo.path().projection(this.projection);
+		map.append('g')
+			.attr('class', 'moscow')
+			.selectAll('path')
+				.data(topojson.feature(mapData, mapData.objects.districts).features)
+			.enter().append('path')
+			.attr('d', path)
+			.attr('class', 'district');
+
+		return true;
+	},
+
+	getData: function() {
+		var deferred = Q.defer();
+
+		d3.json('/get_data', function(data) {
+			deferred.resolve(data);
+		});
+
+		return deferred.promise;
+	},
+
+	_parseData: function(rawData) {
+		var parseDate = function(strDate) {
+			// решение для частного случая - возвращаем только день месяца
+			return parseInt(strDate.split('.')[0]);
+		};
+
+		var parseCoords = function(strfloat) {
+			return parseFloat(strfloat.split(',').join('.'));
 		}
-		
+
 		// оставим только нужные данные
-		var parsedData = [];
-		for (var i = 0, l = rawData.length; i < l; i++) {
-			var item = rawData[i];
-			console.log(i, item);
-			parsedData.push({
-				date: this._parseDate(item.date),
-				lat: this._parseFloat(item.lat),
-				long: this._parseFloat(item.long),
+		return rawData.map(function(item) {
+			var coords = [parseCoords(item.long), parseCoords(item.lat)];
+			var position = this.projection(coords);
+			return {
+				date: parseDate(item.date),
+				coords: coords,
+				position: position,
 				center: !!parseInt(item.center),
 				peref: !parseInt(item.center) // данные немного косячные - бывает такое, что {center: 0, peref: 0}. Чтобы сумма сходилась, делаю так.
-			});
-		}
-
-		// parsedData = this._normalizeCoords(parsedData);
-
-		return parsedData;
+			};
+		}.bind(this));
 	},
 
-	_parseDate: function(strDate) {
-		// решение для частного случая - возвращаем только день месяца
-		return parseInt(strDate.split('.')[0]);
-
-		// решение для общего случая - возвращаем нормальный объект Date
-		// var dmy = strDate.split('.');
-		// return new Date(dmy[2], dmy[1]-1, dmy[0]);
-	},
-
-	_parseFloat: function(strfloat) {
-		return parseFloat(strfloat.split(',').join('.'));
-	},
-
-	_normalizeCoords: function(data) {
-
+	_drawDataLayer: function(data) {
+		this._drawHistogram(data);
+		this._drawData(data);
 	},
 
 	_drawData: function(data) {
 		document.body.className = '';
+
+		var points = this.svg.append('svg:g')
+			.attr('id', 'points')
+
+		points.selectAll('circle')
+			.data(data)
+			.enter().append('svg:circle')
+			.attr('cx', function(d, i) {
+				return data[i].position[0]; 
+			})
+			.attr('cy', function(d, i) {
+				return data[i].position[1];
+			})
+			.attr('data-date', function(d,i) {
+				return data[i].date;
+			})
+			.attr('class', function(d,i) {
+				return data[i].center ? "center" : "peref"
+			})
+			.attr('r', 5);
 	},
 
 	_drawHistogram: function(data) {

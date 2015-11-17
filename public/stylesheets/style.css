@@ -4,11 +4,6 @@ body {
   margin: 0;
   height: 100%;
 }
-body {
-  background-image: url("/images/map.png");
-  background-size: cover;
-  background-position: center center;
-}
 .histogram {
   position: fixed;
   right: 0;
@@ -17,4 +12,25 @@ body {
   height: 100px;
   background-color: #000;
   opacity: 0.8;
+}
+.origin {
+  position: absolute;
+  width: 0;
+  height: 0;
+  left: 50%;
+  top: 50%;
+}
+.district {
+  fill: #ddd;
+  stroke: #ccc;
+}
+circle.center {
+  fill: #4682b4;
+  fill-opacity: 0.8;
+  stroke: #fff;
+}
+circle.peref {
+  fill: #ffa500;
+  fill-opacity: 0.8;
+  stroke: #fff;
 }
