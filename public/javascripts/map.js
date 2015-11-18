@@ -48,13 +48,11 @@ var M = {
     		.attr('id', 'map');
 
 		var path = d3.geo.path().projection(this.projection);
-		map.append('g')
-			.attr('class', 'moscow')
-			.selectAll('path')
+		map.selectAll('path')
 				.data(topojson.feature(mapData, mapData.objects.districts).features)
 			.enter().append('path')
-			.attr('d', path)
-			.attr('class', 'district');
+				.attr('d', path)
+				.attr('class', 'district');
 
 		return true;
 	},
@@ -94,13 +92,11 @@ var M = {
 	},
 
 	_drawDataLayer: function(data) {
-		this._drawHistogram(data);
 		this._drawData(data);
+		this._drawHistogram(data);
 	},
 
 	_drawData: function(data) {
-		document.body.className = '';
-
 		var points = this.svg.append('svg:g')
 			.attr('id', 'points')
 
@@ -120,9 +116,58 @@ var M = {
 				return data[i].center ? "center" : "peref"
 			})
 			.attr('r', 5);
+		document.body.className = '';
 	},
 
 	_drawHistogram: function(data) {
+		var values = d3.range(1000).map(d3.random.bates(10));
 
+		var width = 300,
+		    height = 50;
+
+		var centerData = d3.layout.histogram()
+			.value(function(item) {
+				return item.center ? item.date : null;
+			})
+			.bins(31)(data)
+
+		var perefData = d3.layout.histogram()
+			.value(function(item) {
+				return item.center ? null : item.date;
+			})
+			.bins(31)(data)
+
+		var x = d3.scale.linear()
+		    .domain([0, 31])
+		    .range([0, width]);
+
+		var y = d3.scale.linear()
+		    .domain([0, d3.max(centerData, function(d) { return d.y; })])
+		    .range([height, 0]);
+
+		var svg = d3.select(".histogram").append("svg")
+		    .attr("width", width)
+		    .attr("height", height*2)
+		  .append("g");
+
+		var centerArea = d3.svg.area()
+		    .x(function(d) { return x(d.x); })
+		    .y0(height)
+		    .y1(function(d) { return y(d.y); });
+
+		svg.append("path")
+	      .datum(centerData)
+	      .attr("class", "centerarea")
+	      .attr("d", centerArea);
+
+	    var perefArea = d3.svg.area()
+		    .x(function(d) { return x(d.x); })
+		    .y0(height)
+		    .y1(function(d) { return height*2 - y(d.y); });
+
+		svg.append("path")
+	      .datum(perefData)
+	      .attr("class", "perefarea")
+	      .attr("d", perefArea);
 	}
 }

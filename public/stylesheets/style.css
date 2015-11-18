@@ -8,7 +8,8 @@ body {
   position: fixed;
   right: 0;
   top: 10%;
-  width: 200px;
+  padding: 20px;
+  width: 300px;
   height: 100px;
   background-color: #000;
   opacity: 0.8;
@@ -21,8 +22,8 @@ body {
   top: 50%;
 }
 .district {
-  fill: #ddd;
-  stroke: #ccc;
+  fill: #ccc;
+  stroke: #ddd;
 }
 circle.center {
   fill: #4682b4;
@@ -33,4 +34,12 @@ circle.peref {
   fill: #ffa500;
   fill-opacity: 0.8;
   stroke: #fff;
+}
+.centerbar,
+.centerarea {
+  fill: #4682b4;
+}
+.perefbar,
+.perefarea {
+  fill: #ffa500;
 }
