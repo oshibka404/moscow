@@ -193,7 +193,7 @@ var M = {
 
 
 		svg.append("text")
-			.text(centerData.length)
+			.text(d3.selectAll(".center")[0].length)
 			.attr('dx', width/2)
 			.attr('dy', height/2)
 			.attr('text-anchor', 'middle')
@@ -205,7 +205,7 @@ var M = {
 				.style('opacity', 1);
 
 	   	svg.append("text")
-			.text(perefData.length)
+			.text(d3.selectAll(".peref")[0].length)
 			.attr('dx', width/2)
 			.attr('dy', height * 1.5)
 			.attr('text-anchor', 'middle')
