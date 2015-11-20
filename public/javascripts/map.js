@@ -13,7 +13,8 @@ var M = {
 		this.getMap()
 			.then(this._setProjection.bind(this))
 			.then(this._drawMap.bind(this))
-			.then(this.getData.bind(this))
+		
+		this.getData()
 			.then(this._parseData.bind(this))
 			.then(this._drawDataLayer.bind(this))
 			.catch(function(err) {
