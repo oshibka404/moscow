@@ -119,7 +119,7 @@ var M = {
 				return data[i].date;
 			})
 			.attr('class', function(d,i) {
-				return data[i].center ? "center" : "peref"
+				return data[i].center ? 'center' : 'peref'
 			})
 			.attr('r', 0)
 			.style('opacity', 0)
@@ -159,20 +159,20 @@ var M = {
 			.domain([0, d3.max(centerData, function(d) { return d.y; })])
 			.range([height, 0]);
 
-		var svg = d3.select(".histogram").append("svg")
-			.attr("width", width)
-			.attr("height", height*2)
-			.append("g");
+		var svg = d3.select('.histogram').append('svg')
+			.attr('width', width)
+			.attr('height', height*2)
+			.append('g');
 
 		var centerArea = d3.svg.area()
 			.x(function(d) { return x(d.x); })
 			.y0(height)
 			.y1(function(d) { return y(d.y); });
 
-		svg.append("path")
+		svg.append('path')
 			.datum(centerData)
-			.attr("class", "centerarea")
-			.attr("d", centerArea)
+			.attr('class', 'centerarea')
+			.attr('d', centerArea)
 			.style('opacity', 0)
 			.transition()
 				.duration(3000)
@@ -183,18 +183,18 @@ var M = {
 			.y0(height)
 			.y1(function(d) { return height*2 - y(d.y); });
 
-		svg.append("path")
+		svg.append('path')
 			.datum(perefData)
-			.attr("class", "perefarea")
-			.attr("d", perefArea)
+			.attr('class', 'perefarea')
+			.attr('d', perefArea)
 			.style('opacity', 0)
 			.transition()
 				.duration(3000)
 				.style('opacity', 1);
 
 
-		svg.append("text")
-			.text(d3.selectAll(".center")[0].length)
+		svg.append('text')
+			.text(d3.selectAll('.center')[0].length)
 			.attr('dx', width/2)
 			.attr('dy', height/2)
 			.attr('text-anchor', 'middle')
@@ -205,8 +205,8 @@ var M = {
 				.duration(3000)
 				.style('opacity', 1);
 
-		svg.append("text")
-			.text(d3.selectAll(".peref")[0].length)
+		svg.append('text')
+			.text(d3.selectAll('.peref')[0].length)
 			.attr('dx', width/2)
 			.attr('dy', height * 1.5)
 			.attr('text-anchor', 'middle')
@@ -220,40 +220,37 @@ var M = {
 		var that = this;
 
 		var dragLeft = d3.behavior.drag()
-			.origin(function(d) {return d;})
-			.on("drag", function(d) {
+			.on('drag', function(d) {
 				var newPos = Math.max(0, Math.min(width, d3.event.x));
 				d.x = Math.floor(x.invert(newPos));
-				d3.select(this).attr("cx", x(d.x));
-				console.log(d.x, newPos)
+				d3.select(this).attr('cx', x(d.x));
+				that._onDragChange()
 			});
 
 		var dragRight = d3.behavior.drag()
-			.origin(function(d) {return d;})
-			.on("drag", function(d) {
+			.on('drag', function(d) {
 				var newPos = Math.max(0, Math.min(width, d3.event.x));
 				d.x = Math.ceil(x.invert(newPos));
-				d3.select(this).attr("cx", x(d.x));
-				console.log(d.x, newPos)
+				d3.select(this).attr('cx', x(d.x));
 			});
 
-		svg.append("circle")
+		svg.append('circle')
 			.data([{x: 1}])
-			.attr("r", 5)
-			.attr("cx", function(d) {
+			.attr('r', 5)
+			.attr('cx', function(d) {
 				return x(d.x)
 			})
-			.attr("cy", height)
+			.attr('cy', height)
 			.style('fill', 'white')
 			.call(dragLeft);
 
-		svg.append("circle")
+		svg.append('circle')
 			.data([{x: centerData.length-1}])
-			.attr("r", 5)
-			.attr("cx", function(d) {
+			.attr('r', 5)
+			.attr('cx', function(d) {
 				return x(d.x)
 			})
-			.attr("cy", height)
+			.attr('cy', height)
 			.style('fill', 'white')
 			.call(dragRight);
 	}
