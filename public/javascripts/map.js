@@ -151,7 +151,7 @@ var M = {
 			.bins(31)(data);
 
 		var x = d3.scale.linear()
-			.domain([0, 31])
+			.domain([1, 30])
 			.range([0, width]);
 
 		var y = d3.scale.linear()
@@ -221,17 +221,23 @@ var M = {
 		var dragLeft = d3.behavior.drag()
 			.origin(function(d) {return d;})
 			.on("drag", function(d) {
-				d3.select(this).attr("cx", d.x = Math.max(0, Math.min(width, d3.event.x)));
+				var newPos = Math.max(0, Math.min(width, d3.event.x));
+				d.x = Math.floor(x.invert(newPos));
+				d3.select(this).attr("cx", x(d.x));
+				console.log(d.x, newPos)
 			});
 
 		var dragRight = d3.behavior.drag()
 			.origin(function(d) {return d;})
 			.on("drag", function(d) {
-				d3.select(this).attr("cx", d.x = Math.max(0, Math.min(width, d3.event.x)));
+				var newPos = Math.max(0, Math.min(width, d3.event.x));
+				d.x = Math.ceil(x.invert(newPos));
+				d3.select(this).attr("cx", x(d.x));
+				console.log(d.x, newPos)
 			});
 
 		svg.append("circle")
-			.data([{x:0}])
+			.data([{x: 1}])
 			.attr("r", 5)
 			.attr("cx", function(d) {
 				return x(d.x)
@@ -241,7 +247,7 @@ var M = {
 			.call(dragLeft);
 
 		svg.append("circle")
-			.data([{x:centerData.length}])
+			.data([{x: centerData.length-1}])
 			.attr("r", 5)
 			.attr("cx", function(d) {
 				return x(d.x)
@@ -249,7 +255,5 @@ var M = {
 			.attr("cy", height)
 			.style('fill', 'white')
 			.call(dragRight);
-
-
 	}
 }
