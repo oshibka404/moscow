@@ -98,7 +98,7 @@ var M = {
 
 	_drawDataLayer: function(data) {
 		this._drawData(data);
-		this._drawHistogram(data);
+		this._drawControls(data);
 	},
 
 	_drawData: function(data) {
@@ -134,7 +134,7 @@ var M = {
 		document.body.className = '';
 	},
 
-	_drawHistogram: function(data) {
+	_drawControls: function(data) {
 		var width = 300,
 			height = 50;
 
@@ -204,7 +204,7 @@ var M = {
 				.duration(3000)
 				.style('opacity', 1);
 
-	   	svg.append("text")
+		svg.append("text")
 			.text(d3.selectAll(".peref")[0].length)
 			.attr('dx', width/2)
 			.attr('dy', height * 1.5)
@@ -215,5 +215,41 @@ var M = {
 			.transition()
 				.duration(3000)
 				.style('opacity', 1);
+
+		var that = this;
+
+		var dragLeft = d3.behavior.drag()
+			.origin(function(d) {return d;})
+			.on("drag", function(d) {
+				d3.select(this).attr("cx", d.x = Math.max(0, Math.min(width, d3.event.x)));
+			});
+
+		var dragRight = d3.behavior.drag()
+			.origin(function(d) {return d;})
+			.on("drag", function(d) {
+				d3.select(this).attr("cx", d.x = Math.max(0, Math.min(width, d3.event.x)));
+			});
+
+		svg.append("circle")
+			.data([{x:0}])
+			.attr("r", 5)
+			.attr("cx", function(d) {
+				return x(d.x)
+			})
+			.attr("cy", height)
+			.style('fill', 'white')
+			.call(dragLeft);
+
+		svg.append("circle")
+			.data([{x:centerData.length}])
+			.attr("r", 5)
+			.attr("cx", function(d) {
+				return x(d.x)
+			})
+			.attr("cy", height)
+			.style('fill', 'white')
+			.call(dragRight);
+
+
 	}
 }
