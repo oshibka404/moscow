@@ -252,7 +252,7 @@ var M = {
 
 		svg.append('polygon')
 			.data([{x: 1}])
-			.attr('points', '0,0 0,' + (height * 2) + ' -10,' + (height * 2) + ' 0,' + (height * 2 - 10))
+			.attr('points', '0,0 0,' + (height * 2) + ' -10,' + (height * 2) + ' 0,' + (height * 2 - 15))
 			.attr('transform', function(d) {
 				return 'translate(' + Math.floor(x(d.x)) + ')';
 			})
@@ -263,7 +263,7 @@ var M = {
 
 		svg.append('polygon')
 			.data([{x: centerData.length-1}])
-			.attr('points', '0,0 0,' + (height * 2) + ' 10,' + (height * 2) + ' 0,' + (height * 2 - 10))
+			.attr('points', '0,0 0,' + (height * 2) + ' 10,' + (height * 2) + ' 0,' + (height * 2 - 15))
 			.attr('transform', function(d) {
 				return 'translate(' + Math.floor(x(d.x)) + ')';
 			})
