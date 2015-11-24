@@ -218,13 +218,16 @@ var M = {
 				.style('opacity', 1);
 
 		var that = this;
+		var leftPosition = x.invert(0);
+		var rightPosition = x.invert(width);
 
 		var dragLeft = d3.behavior.drag()
 			.on('drag', function(d) {
 				var newPos = Math.max(0, Math.min(width, d3.event.x));
 				d.x = Math.floor(x.invert(newPos));
 				d3.select(this).attr('cx', x(d.x));
-				that._onDragChange()
+				leftPosition = d.x;
+				that._filterData(leftPosition, rightPosition);
 			});
 
 		var dragRight = d3.behavior.drag()
@@ -232,6 +235,8 @@ var M = {
 				var newPos = Math.max(0, Math.min(width, d3.event.x));
 				d.x = Math.ceil(x.invert(newPos));
 				d3.select(this).attr('cx', x(d.x));
+				rightPosition = d.x;
+				that._filterData(leftPosition, rightPosition);
 			});
 
 		svg.append('circle')
@@ -253,5 +258,33 @@ var M = {
 			.attr('cy', height)
 			.style('fill', 'white')
 			.call(dragRight);
+	},
+
+	_filterData: function(leftPosition, rightPosition) {
+		var circlesToHide = this.svg.selectAll('circle').filter(function(d) {
+			return d.date < leftPosition || d.date > rightPosition;
+		});
+
+		circlesToHide.transition()
+			.duration(function() {
+				return Math.random() * 1000;
+			})
+			.delay(function() {
+				return Math.random() * 1000;
+			})
+			.attr('r', 0);
+		
+		var circlesToShow = this.svg.selectAll('circle').filter(function(d) {
+			return d.date >= leftPosition && d.date <= rightPosition;
+		})
+
+		circlesToShow.transition()
+			.duration(function() {
+				return Math.random() * 1000;
+			})
+			.delay(function() {
+				return Math.random() * 1000;
+			})
+			.attr('r', 5);
 	}
 }
