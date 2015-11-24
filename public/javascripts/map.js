@@ -154,7 +154,7 @@ var M = {
 			.bins(31)(data);
 
 		var x = this.xScale = d3.scale.linear()
-			.domain([1, 30])
+			.domain([0, 31])
 			.range([0, width]);
 
 		var y = d3.scale.linear()
@@ -230,42 +230,54 @@ var M = {
 
 		var dragLeft = d3.behavior.drag()
 			.on('drag', function(d) {
-				var newPos = Math.max(0, Math.min(width, d3.event.x));
+				var newPos = Math.max(x(1), Math.min(width-x(1), d3.event.x));
 				d.x = Math.floor(x.invert(newPos));
-				d.x = (d.x <= rightPosition) ? d.x : rightPosition-1;
-				d3.select(this).attr('cx', x(d.x));
+				d.x = (d.x < rightPosition) ? d.x : rightPosition-1;
+				d3.select(this)
+					.attr('x1', x(d.x))
+					.attr('x2', x(d.x));
 				leftPosition = d.x;
-				that._filterData(leftPosition, rightPosition);
+				that._filterData(leftPosition, rightPosition);	
 			});
 
 		var dragRight = d3.behavior.drag()
 			.on('drag', function(d) {
-				var newPos = Math.max(0, Math.min(width, d3.event.x));
+				var newPos = Math.max(x(1), Math.min(width-x(1), d3.event.x));
 				d.x = Math.ceil(x.invert(newPos));
-				d.x = (d.x >= leftPosition) ? d.x : leftPosition+1;
-				d3.select(this).attr('cx', x(d.x));
+				d.x = (d.x > leftPosition) ? d.x : leftPosition+1;
+				d3.select(this)
+					.attr('x1', x(d.x))
+					.attr('x2', x(d.x));
 				rightPosition = d.x;
 				that._filterData(leftPosition, rightPosition);
 			});
 
-		svg.append('circle')
+		svg.append('line')
 			.data([{x: 1}])
-			.attr('r', 5)
-			.attr('cx', function(d) {
-				return x(d.x)
+			.attr('y1', 0)
+			.attr('y2', height*2)
+			.attr('x1', function(d) {
+				return x(d.x);
 			})
-			.attr('cy', height)
-			.style('fill', 'white')
+			.attr('x2', function(d) {
+				return x(d.x);
+			})
+			.style('stroke', 'white')
+			.style('cursor', 'move')
 			.call(dragLeft);
 
-		svg.append('circle')
+		svg.append('line')
 			.data([{x: centerData.length-1}])
-			.attr('r', 5)
-			.attr('cx', function(d) {
-				return x(d.x)
+			.attr('y1', 0)
+			.attr('y2', height*2)
+			.attr('x1', function(d) {
+				return x(d.x);
 			})
-			.attr('cy', height)
-			.style('fill', 'white')
+			.attr('x2', function(d) {
+				return x(d.x);
+			})
+			.style('stroke', 'white')
+			.style('cursor', 'move')
 			.call(dragRight);
 	},
 
@@ -274,11 +286,15 @@ var M = {
 		var dx = this.xScale(leftPosition) + (this.xScale(rightPosition) - this.xScale(leftPosition))/2;
 		this.centerCount
 			.text(center)
+			.transition()
+			.duration(100)
 			.attr('dx', dx)
 			.attr('dy', fontSize/2)
 			.style('font-size', fontSize);
 		this.perefCount
 			.text(peref)
+			.transition()
+			.duration(100)
 			.attr('dx', dx)
 			.attr('dy', fontSize/2)
 			.style('font-size', fontSize);
