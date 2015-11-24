@@ -225,6 +225,7 @@ var M = {
 			.on('drag', function(d) {
 				var newPos = Math.max(0, Math.min(width, d3.event.x));
 				d.x = Math.floor(x.invert(newPos));
+				d.x = (d.x <= rightPosition) ? d.x : rightPosition-1;
 				d3.select(this).attr('cx', x(d.x));
 				leftPosition = d.x;
 				that._filterData(leftPosition, rightPosition);
@@ -234,6 +235,7 @@ var M = {
 			.on('drag', function(d) {
 				var newPos = Math.max(0, Math.min(width, d3.event.x));
 				d.x = Math.ceil(x.invert(newPos));
+				d.x = (d.x >= leftPosition) ? d.x : leftPosition+1;
 				d3.select(this).attr('cx', x(d.x));
 				rightPosition = d.x;
 				that._filterData(leftPosition, rightPosition);
