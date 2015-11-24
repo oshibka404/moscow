@@ -11,27 +11,20 @@ body {
   padding: 20px;
   width: 300px;
   height: 200px;
-  background-color: #000;
+  font-family: Helvetica;
+  background-color: #ccc;
+  border: 1px #000 solid;
   opacity: 0.8;
-}
-.origin {
-  position: absolute;
-  width: 0;
-  height: 0;
-  left: 50%;
-  top: 50%;
 }
 .district {
   fill: #ccc;
-  stroke: #ddd;
+  stroke: #999;
 }
 circle.center {
   fill: #4682b4;
-  stroke: #fff;
 }
 circle.peref {
   fill: #ffa500;
-  stroke: #fff;
 }
 .centerbar,
 .centerarea {

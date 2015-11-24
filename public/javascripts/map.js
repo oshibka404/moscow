@@ -57,8 +57,8 @@ var M = {
 				.attr('class', 'district')
 				.style('opacity', 0)
 				.transition()
-					.duration(5000)
-					.style('opacity', 1);
+					.duration(3000)
+					.style('opacity', .8);
 
 		return true;
 	},
@@ -202,7 +202,7 @@ var M = {
 			.attr('dx', width / 2)
 			.attr('dy', fontSize / 2)
 			.attr('text-anchor', 'middle')
-			.style('fill', 'white')
+			.style('fill', '#000')
 			.style('font-size', fontSize)
 			.style('opacity', 0);
 
@@ -216,7 +216,7 @@ var M = {
 			.attr('dx', width / 2)
 			.attr('dy', fontSize / 2)
 			.attr('text-anchor', 'middle')
-			.style('fill', 'white')
+			.style('fill', '#000')
 			.style('opacity', 0)
 			.style('font-size', fontSize)
 		
@@ -234,8 +234,7 @@ var M = {
 				d.x = Math.floor(x.invert(newPos));
 				d.x = (d.x < rightPosition) ? d.x : rightPosition-1;
 				d3.select(this)
-					.attr('x1', x(d.x))
-					.attr('x2', x(d.x));
+					.attr('transform', 'translate(' + x(d.x) + ')')
 				leftPosition = d.x;
 				that._filterData(leftPosition, rightPosition);	
 			});
@@ -246,37 +245,30 @@ var M = {
 				d.x = Math.ceil(x.invert(newPos));
 				d.x = (d.x > leftPosition) ? d.x : leftPosition+1;
 				d3.select(this)
-					.attr('x1', x(d.x))
-					.attr('x2', x(d.x));
+					.attr('transform', 'translate(' + x(d.x) + ')')
 				rightPosition = d.x;
 				that._filterData(leftPosition, rightPosition);
 			});
 
-		svg.append('line')
+		svg.append('polygon')
 			.data([{x: 1}])
-			.attr('y1', 0)
-			.attr('y2', height*2)
-			.attr('x1', function(d) {
-				return x(d.x);
+			.attr('points', '0,0 0,' + (height * 2) + ' -10,' + (height * 2) + ' 0,' + (height * 2 - 10))
+			.attr('transform', function(d) {
+				return 'translate(' + Math.floor(x(d.x)) + ')';
 			})
-			.attr('x2', function(d) {
-				return x(d.x);
-			})
-			.style('stroke', 'white')
+			.style('stroke', 'black')
+			.style('fill', 'black')
 			.style('cursor', 'move')
 			.call(dragLeft);
 
-		svg.append('line')
+		svg.append('polygon')
 			.data([{x: centerData.length-1}])
-			.attr('y1', 0)
-			.attr('y2', height*2)
-			.attr('x1', function(d) {
-				return x(d.x);
+			.attr('points', '0,0 0,' + (height * 2) + ' 10,' + (height * 2) + ' 0,' + (height * 2 - 10))
+			.attr('transform', function(d) {
+				return 'translate(' + Math.floor(x(d.x)) + ')';
 			})
-			.attr('x2', function(d) {
-				return x(d.x);
-			})
-			.style('stroke', 'white')
+			.style('stroke', 'black')
+			.style('fill', 'black')
 			.style('cursor', 'move')
 			.call(dragRight);
 	},
