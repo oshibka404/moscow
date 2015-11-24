@@ -132,7 +132,7 @@ var M = {
 				.delay(function() {
 					return Math.random() * transDuration;
 				})
-				.attr('r', 5);
+				.attr('r', 10);
 		document.body.className = '';
 	},
 
@@ -161,17 +161,23 @@ var M = {
 			.domain([0, d3.max(centerData, function(d) { return d.y; })])
 			.range([height, 0]);
 
-		var svg = d3.select('.histogram').append('svg')
+		var histogram = this.svg.append('g')
+			.attr('transform', 'translate(' + (this.width - width) + ', 100)');
+
+		var rectHeight = height * 2 + 20;
+		histogram.append('rect')
 			.attr('width', width)
-			.attr('height', height*2)
-			.append('g');
+			.attr('height', rectHeight)
+			.attr('fill', '#c0c0c0')
+			.attr('stroke', '#000')
+			.style('opacity', .8);
 
 		var centerArea = d3.svg.area()
 			.x(function(d) { return x(d.x); })
 			.y0(height)
 			.y1(function(d) { return y(d.y); });
 
-		svg.append('path')
+		histogram.append('path')
 			.datum(centerData)
 			.attr('class', 'centerarea')
 			.attr('d', centerArea)
@@ -185,7 +191,7 @@ var M = {
 			.y0(height)
 			.y1(function(d) { return height*2 - y(d.y); });
 
-		svg.append('path')
+		histogram.append('path')
 			.datum(perefData)
 			.attr('class', 'perefarea')
 			.attr('d', perefArea)
@@ -196,7 +202,7 @@ var M = {
 
 		var fontSize = 60;
 
-		this.centerCount = svg.append('text')
+		this.centerCount = histogram.append('text')
 			.text(d3.selectAll('.center')[0].length)
 			.attr('y', height / 2)
 			.attr('dx', width / 2)
@@ -210,7 +216,7 @@ var M = {
 			.duration(transDuration)
 			.style('opacity', 1);
 
-		this.perefCount = svg.append('text')
+		this.perefCount = histogram.append('text')
 			.text(d3.selectAll('.peref')[0].length)
 			.attr('y', height * 1.5)
 			.attr('dx', width / 2)
@@ -250,9 +256,9 @@ var M = {
 				that._filterData(leftPosition, rightPosition);
 			});
 
-		svg.append('polygon')
+		histogram.append('polygon')
 			.data([{x: 1}])
-			.attr('points', '0,0 0,' + (height * 2) + ' -10,' + (height * 2) + ' 0,' + (height * 2 - 15))
+			.attr('points', '0,0 0,' + (rectHeight) + ' -10,' + (rectHeight) + ' 0,' + (rectHeight - 15))
 			.attr('transform', function(d) {
 				return 'translate(' + Math.floor(x(d.x)) + ')';
 			})
@@ -261,9 +267,9 @@ var M = {
 			.style('cursor', 'move')
 			.call(dragLeft);
 
-		svg.append('polygon')
+		histogram.append('polygon')
 			.data([{x: centerData.length-1}])
-			.attr('points', '0,0 0,' + (height * 2) + ' 10,' + (height * 2) + ' 0,' + (height * 2 - 15))
+			.attr('points', '0,0 0,' + (rectHeight) + ' 10,' + (rectHeight) + ' 0,' + (rectHeight - 15))
 			.attr('transform', function(d) {
 				return 'translate(' + Math.floor(x(d.x)) + ')';
 			})
@@ -327,6 +333,6 @@ var M = {
 			.delay(function() {
 				return Math.random() * transDuration;
 			})
-			.attr('r', 5);
+			.attr('r', 10);
 	}
 }
