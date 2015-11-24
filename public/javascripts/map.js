@@ -105,6 +105,7 @@ var M = {
 	_drawData: function(data) {
 		var points = this.svg.append('svg:g')
 			.attr('id', 'points')
+		var transDuration = 3000;
 
 		points.selectAll('circle')
 			.data(data)
@@ -126,10 +127,10 @@ var M = {
 			.transition()
 				.style('opacity', .8)
 				.duration(function() {
-					return Math.random() * 3000;
+					return Math.random() * transDuration;
 				})
 				.delay(function() {
-					return Math.random() * 3000;
+					return Math.random() * transDuration;
 				})
 				.attr('r', 5);
 		document.body.className = '';
@@ -137,7 +138,8 @@ var M = {
 
 	_drawControls: function(data) {
 		var width = 300,
-			height = 50;
+			height = 100,
+			transDuration = 3000;
 
 		var centerData = d3.layout.histogram()
 			.value(function(item) {
@@ -151,7 +153,7 @@ var M = {
 			})
 			.bins(31)(data);
 
-		var x = d3.scale.linear()
+		var x = this.xScale = d3.scale.linear()
 			.domain([1, 30])
 			.range([0, width]);
 
@@ -175,7 +177,7 @@ var M = {
 			.attr('d', centerArea)
 			.style('opacity', 0)
 			.transition()
-				.duration(3000)
+				.duration(transDuration)
 				.style('opacity', 1);
 
 		var perefArea = d3.svg.area()
@@ -189,33 +191,38 @@ var M = {
 			.attr('d', perefArea)
 			.style('opacity', 0)
 			.transition()
-				.duration(3000)
+				.duration(transDuration)
 				.style('opacity', 1);
 
+		var fontSize = 60;
 
-		svg.append('text')
+		this.centerCount = svg.append('text')
 			.text(d3.selectAll('.center')[0].length)
-			.attr('dx', width/2)
-			.attr('dy', height/2)
+			.attr('y', height / 2)
+			.attr('dx', width / 2)
+			.attr('dy', fontSize / 2)
 			.attr('text-anchor', 'middle')
 			.style('fill', 'white')
-			.style('font-size', Math.min(data.length / 20, 50 ))
-			.style('opacity', 0)
-			.transition()
-				.duration(3000)
-				.style('opacity', 1);
+			.style('font-size', fontSize)
+			.style('opacity', 0);
 
-		svg.append('text')
+		this.centerCount.transition()
+			.duration(transDuration)
+			.style('opacity', 1);
+
+		this.perefCount = svg.append('text')
 			.text(d3.selectAll('.peref')[0].length)
-			.attr('dx', width/2)
-			.attr('dy', height * 1.5)
+			.attr('y', height * 1.5)
+			.attr('dx', width / 2)
+			.attr('dy', fontSize / 2)
 			.attr('text-anchor', 'middle')
 			.style('fill', 'white')
 			.style('opacity', 0)
-			.style('font-size', Math.min(data.length / 20, 50 ))
-			.transition()
-				.duration(3000)
-				.style('opacity', 1);
+			.style('font-size', fontSize)
+		
+		this.perefCount.transition()
+			.duration(transDuration)
+			.style('opacity', 1);
 
 		var that = this;
 		var leftPosition = x.invert(0);
@@ -262,30 +269,55 @@ var M = {
 			.call(dragRight);
 	},
 
+	_updateCount: function(center, peref, leftPosition, rightPosition) {
+		var fontSize = Math.max((rightPosition - leftPosition)*2, 15);
+		var dx = this.xScale(leftPosition) + (this.xScale(rightPosition) - this.xScale(leftPosition))/2;
+		this.centerCount
+			.text(center)
+			.attr('dx', dx)
+			.attr('dy', fontSize/2)
+			.style('font-size', fontSize);
+		this.perefCount
+			.text(peref)
+			.attr('dx', dx)
+			.attr('dy', fontSize/2)
+			.style('font-size', fontSize);
+
+	},
+
 	_filterData: function(leftPosition, rightPosition) {
 		var circlesToHide = this.svg.selectAll('circle').filter(function(d) {
 			return d.date < leftPosition || d.date > rightPosition;
 		});
-
-		circlesToHide.transition()
-			.duration(function() {
-				return Math.random() * 1000;
-			})
-			.delay(function() {
-				return Math.random() * 1000;
-			})
-			.attr('r', 0);
 		
 		var circlesToShow = this.svg.selectAll('circle').filter(function(d) {
 			return d.date >= leftPosition && d.date <= rightPosition;
-		})
+		});
+
+		var centerCirclesCount = circlesToShow.filter(function(d) {
+			return !!d.center;
+		})[0].length;
+
+		var perefCirclesCount = circlesToShow[0].length - centerCirclesCount;
+
+		this._updateCount(centerCirclesCount, perefCirclesCount, leftPosition, rightPosition);
+
+		var transDuration = 1000;
+		circlesToHide.transition()
+			.duration(function() {
+				return Math.random() * transDuration;
+			})
+			.delay(function() {
+				return Math.random() * transDuration;
+			})
+			.attr('r', 0);
 
 		circlesToShow.transition()
 			.duration(function() {
-				return Math.random() * 1000;
+				return Math.random() * transDuration;
 			})
 			.delay(function() {
-				return Math.random() * 1000;
+				return Math.random() * transDuration;
 			})
 			.attr('r', 5);
 	}
